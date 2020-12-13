@@ -1,0 +1,27 @@
+---
+title: "README"
+author: "ISY"
+date: "12/13/2020"
+output: pdf_document
+---
+
+**Coursera Getting and Cleaning Data Course- Week 4 Assignment**
+
+One of the most exciting areas in all of data science right now is wearable computing - see for example this article (http://www.insideactivitytracking.com/data-science-activity-tracking-and-the-battle-for-the-worlds-top-sports-brand/) . Companies like Fitbit, Nike, and Jawbone Up are racing to develop the most advanced algorithms to attract new users. The data linked to from the course website represent data collected from the accelerometers from the Samsung Galaxy S smartphone. A full description is available at the site where the data was obtained:
+
+http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
+
+Data for the project:
+https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
+
+In this repository, you will find Codebook.Rmd file, run_analysis.R file. Markdoww
+file will consist the explanation of the steps to complete this assignment. Read it carefully.
+
+R file will consist the script that computes the requirement of this assignment.
+You can check markdown file first and work with the R file later.
+
+Note that both markdown file and R file includes directory names of my computer.
+Before working with the files, don't forget to change the directory names. Each
+directory variable has been described before creating one.
+
+Hope you enjoy!
