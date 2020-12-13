@@ -1,0 +1,175 @@
+---
+title: "CodeBook"
+author: "ISY"
+date: "12/13/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Assignment for Getting and Cleaning Data Course- Week 4**
+
+In this markdown document, I will describe the steps that I took while working
+on "run_analysis.R" file, which you can find under my Github repository.
+
+*Step 1: Acquiring the zip file*
+
+In the first step, we will be downloading the data that we will use in the R script.
+
+```{r}
+#Define the url first
+url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+
+#Define destination
+destination <- "/Users/ihsanselcukyurttas/Documents/TestingGIT/getcleandata/data.zip"
+
+#download file
+download.file(url, destfile = destination, method = "curl")
+
+#Unzip file
+
+unzip(destination)
+
+```
+
+*Step 2: Loading text files to RStudio Environment*
+
+The assignment asks us to create a data table that merges all the information
+that comes from the mobile phone. As we look at the folder that we have created
+a moment ago by unziping the zip file that contains the data, we can see that
+values are contained in ".txt" files. We will call each of them and assign them
+to new variables.
+
+```{r}
+# Defining directories to variables
+
+#Defining general directories
+directory0 <- "/Users/ihsanselcukyurttas/Documents/TestingGIT/getcleandata/UCI HAR Dataset"
+training <- file.path(directory0, "train")
+test <- file.append(directory, "test")
+
+# Creating training variables
+
+trainSubjects <- read.table(file=file.path(training,"subject_train.txt"))
+trainValues <- read.table(file=file.path(training, "X_train.txt"))
+trainActivity <- read.table(file= file.path(training, "y_train.txt"))
+
+#Creating testing variables
+testSubjects <- read.table(file=file.path(test, "subject_test.txt"))
+testValues <- read.table(file=file.path(test, "X_test.txt"))
+testActivity <- read.table(file.path(test, "y_test.txt"))
+
+#Creating features variable
+features <- read.table(file = file.path(directory0, "features.txt"))
+
+#Creating activity label variable
+activity <- read.table(file= file.path(directory0, "activity_labels.txt"))
+
+```
+
+*Step 3: Creating Intermediary Data Frames*
+
+In this step, we will be creating a merged data frame with the variables that
+we have defined a moment ago. Recall from the readme.txt document,
+each variable has its unique name that is stored in "features.txt" document.
+We will assign those variable names to our merged data table. 
+
+```{r}
+#Load data.table package to create data tables
+library(data.table)
+
+#Combine all
+
+humanActivity <- rbind(
+     cbind(trainSubjects, trainActivity, trainValues),
+     cbind(testSubjects,testActivity, testValues)
+)
+
+#Rename column names
+
+colnames(humanActivity) <- c("Subject", "Activity", features[,2])
+
+```
+
+*Step 4: Selecting expected columns*
+
+In this step,  we will select the variables that shows us means and standard 
+deviations. We will use regular expressions to manipulate strings of
+column names. For a quick review, you can check regular expressions cheat sheet,
+which can be downloaded from RStudio's respective website. I am also leaving a
+download link below.
+
+Link: https://github.com/rstudio/cheatsheets/raw/master/regex.pdf
+
+```{r}
+#Create a logical vector to assess which columns will be selected
+colExtract <- grepl(("Subject|Activity|mean|std"), colnames(humanActivity))
+
+#Apply the logical vector to combined values dataset to extract the
+#expected columns
+
+humanActivity <- humanActivity[,colExtract]
+
+```
+
+*Step 5: Changing the activites with respective string type values*
+
+As "activities.txt" document tells us, each number in "Activity" column of 
+"humanActivity" dataset means a factor. Let's change those numbers to their respective
+factors.
+
+```{r}
+humanActivity$Activity <- factor(humanActivity$Activity, 
+                                 levels = activity[, 1], labels = activity[, 2])
+```
+
+
+*Step 6: Change variable names to descriptive variable names*
+
+Finally, our only job right now is to change variable names to more descriptive.
+Remember that features dataset's second column didn't have that much of an aesthetic
+look. Lets change them. We will use regular expressions and gsub() function here.
+To have a quick review, I recommend checking regular expressions cheatsheet which
+I have added its website link above.
+
+```{r}
+names <- colnames(humanActivity)
+
+#Remove the special characters
+names <- gsub("[\\(\\)-]", "", names)
+
+#Rename all
+
+names <- gsub("^f", "frequencyDomain", names)
+names <- gsub("^t","timeDomain", names)
+names <- gsub("Acc","Accelerometer", names)
+names <- gsub("Gyro", "Gyroscope", names)
+names <- gsub("Freq", "Frequency", names)
+names <- gsub("mean", "Mean", names)
+names <- gsub("std", "SD", names)
+
+#Use new names list for humanActivity column names
+colnames(humanActivity) <- names
+```
+
+*Step 7: Create and extract a dataset with the average of each variable*
+*for each subject and each activity*
+
+```{r}
+#Create a dataset first
+tidy_dataset <- humanActivity %>% 
+     group_by(Subject, Activity) %>%
+     summarize_each(funs(mean))
+```
+
+You may ask about the last line. Get the help page of summarize_each() and funs().
+
+```{r}
+write.table(tidy_dataset, file = "/Users/ihsanselcukyurttas/Documents/TestingGIT/getcleandata",
+            row.names = FALSE)
+```
+
+
+
